@@ -1,0 +1,23 @@
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# local env files
+.env.local
+.env.*.local
+
+# logs
+logs
+*.log
+
+# IDE
+.idea
+.vscode
+.idea
+
+
+.claude/settings.local.json
