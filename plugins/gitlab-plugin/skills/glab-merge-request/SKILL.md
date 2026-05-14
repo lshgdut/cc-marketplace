@@ -1,98 +1,316 @@
 ---
 name: glab-merge-request
-description: 用于创建 GitLab Merge Request 的工作流技能。
-disable-model-invocation: true
+description: Create and submit a GitLab Merge Request workflow. 
+disable-model-invocation: false
 allowed-tools:
-  - Bash(git push *)
+  - Bash(git status *)
+  - Bash(git add *)
   - Bash(git commit *)
+  - Bash(git push *)
+  - Bash(git branch *)
+  - Bash(git checkout *)
+  - Bash(git remote *)
+  - Bash(git config *)
   - Bash(glab *)
+  - Bash(which glab)
+  - Bash(openssl rand *)
   - Read
   - Glob
   - Grep
   - AskUserQuestion
 ---
 
-# GitLab Merge Request 创建工作流
+# GitLab Merge Request Workflow
 
-当用户需要将当前分支推送到 GitLab 并发起合并请求时使用。自动处理分支保护、代码提交和 MR 创建的全流程。
+This workflow automatically:
 
-快速完成从代码变更到 MR 创建的完整流程。
+1. Creates a safe working branch when needed
+2. Commits local changes
+3. Pushes the current branch to GitLab
+4. Creates or updates a GitLab Merge Request
 
-## 前置条件检查
+The workflow follows an **execute-first** strategy:
 
-**检查 glab 是否已安装：**
-```bash
-which glab || echo "NOT_INSTALLED"
-```
+* Prefer directly executing the workflow
+* Only provide dependency setup guidance when a command actually fails
+* Minimize unnecessary pre-checks and interruptions
 
-若未安装，提示用户：
-```
-glab 未安装，请运行以下命令安装：
-  brew install glab
-或参考：https://gitlab.com/gitlab-org/cli/-/blob/main/docs/installation_options.md
-```
+---
 
-**检查 glab 是否已登录：**
-```bash
-glab auth status
-```
+## When to use
 
-若未登录，提示用户：
-```
-请先登录 GitLab：
-  glab auth login --hostname <gitlab.example.org> --token <your-token>
-```
+Use when the user wants to:
 
-## 执行步骤
+* push the current branch
+* create a GitLab Merge Request
+* quickly submit current work to GitLab
 
-### 步骤 1：确保在合适的分支
+Examples:
 
-检查当前分支：
+* `/mr`
+* `create mr`
+* `help me to create gitLab mr`
+
+---
+
+## Execution Strategy
+
+The workflow should:
+
+* attempt the operation directly
+* infer repository state dynamically
+* recover from common git/glab failures automatically when possible
+* only ask the user for intervention when recovery is impossible
+
+Do NOT perform blocking prerequisite checks before execution.
+
+Examples of checks that should be deferred until failure:
+
+* `glab` installation
+* GitLab authentication
+* remote repository existence
+
+---
+
+## Step 1: Determine Working Branch
+
+Get current branch:
+
 ```bash
 git branch --show-current
 ```
 
-若当前分支是 `main` 或匹配 `dev-*` 模式，则自动创建新的个人分支：
+If current branch is:
+
+* `main`
+* `master`
+* `develop`
+* `dev`
+* matches `dev-*`
+* detached HEAD
+* empty branch name
+
+Then create a personal feature branch automatically.
+
+Example:
+
 ```bash
-# 获取 git 用户名
 AUTHOR=$(git config user.name | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
 RANDOM_SUFFIX=$(openssl rand -hex 3)
+
 BRANCH_NAME="mr-${AUTHOR}-${RANDOM_SUFFIX}"
+
 git checkout -b "$BRANCH_NAME"
 ```
 
-若已在个人功能分支（非 main/dev-*），则直接继续。
+Otherwise continue using current branch.
 
-### 步骤 2：提交代码变更
+---
 
-检查 staged 状态：
+## Step 2: Handle Local Changes
+
+Check repository status:
+
 ```bash
 git status --short
 ```
 
-- **若有 staged 文件**（`git diff --cached --stat` 有输出）：直接调用 `/commit` 命令提交
-- **若没有 staged 文件但有变更文件**：执行 `git add .` 后再调用 `/commit` 命令提交
-- **若没有任何变更**：跳过提交步骤，直接创建 MR
+### No Changes
 
-### 步骤 3：创建 Merge Request
+If working tree is clean:
 
-```bash
-glab mr create -f --push --no-editor --create-source-branch -b main --fill --remove-source-branch -y
+```text
+No local changes detected.
+Skipping commit step.
 ```
 
-参数说明：
-- `-f` / `--force`：若 MR 已存在则强制更新
-- `--push`：自动推送当前分支到远程
-- `--no-editor`：不打开编辑器，直接创建
-- `--create-source-branch`：若远程分支不存在则自动创建
-- `-b main`：目标分支为 main
-- `--remove-source-branch`：MR 合并后自动删除源分支
+Continue directly to MR creation.
 
-## 错误处理
+---
 
-| 场景 | 处理方式 |
-|------|----------|
-| glab 未安装 | 提示安装命令，停止执行 |
-| glab 未登录 | 提示登录命令，停止执行 |
-| 无远程仓库 | 提示用户先配置 remote |
-| 提交失败 | 显示错误信息，询问是否继续 |
+### Existing Staged Changes
+
+If staged changes already exist:
+
+```bash
+git diff --cached --stat
+```
+
+Then:
+
+* do NOT run `git add .`
+* commit staged content only
+
+---
+
+### Unstaged Changes
+
+Stage files carefully:
+
+```bash
+git add --update
+git add <new-files-if-needed>
+```
+
+Avoid:
+
+```bash
+git add .
+```
+
+to reduce accidental commits of generated files, secrets, logs, or build artifacts.
+
+---
+
+## Step 3: Create Commit
+
+Create commit using conventional commit style.
+
+Recommended formats:
+
+```text
+feat: add xxx
+fix: resolve xxx
+refactor: improve xxx
+docs: update xxx
+chore: cleanup xxx
+```
+
+If commit fails:
+
+* show git error output
+* ask whether to continue MR creation without committing
+
+---
+
+## Step 4: Push and Create Merge Request
+
+Prefer auto-detecting default branch:
+
+```bash
+git remote show origin | grep 'HEAD branch'
+```
+
+Create MR:
+
+```bash
+glab mr create \
+  --fill \
+  --push \
+  --yes \
+  --remove-source-branch \
+  --create-source-branch \
+  --no-editor
+```
+
+If default branch was detected, use it as:
+
+```bash
+--target-branch <default-branch>
+```
+
+---
+
+## Failure Recovery
+
+Only provide setup instructions after a related command fails.
+
+### glab not installed
+
+If `glab` command is missing:
+
+```text
+GitLab CLI (glab) is not installed.
+
+Install with:
+
+  brew install glab
+
+Documentation:
+https://gitlab.com/gitlab-org/cli/-/blob/main/docs/installation_options.md
+```
+
+Stop execution.
+
+---
+
+### GitLab authentication failed
+
+If GitLab authentication is missing or expired:
+
+```text
+Please login to GitLab first:
+
+  glab auth login
+
+For self-hosted GitLab:
+
+  glab auth login --hostname <gitlab.example.org>
+```
+
+Stop execution.
+
+---
+
+### No remote repository
+
+If git remote is missing:
+
+```text
+No git remote repository is configured.
+
+Example:
+
+  git remote add origin <repository-url>
+```
+
+Stop execution.
+
+---
+
+### Push rejected
+
+If push is rejected:
+
+* show remote rejection reason
+* suggest pull/rebase if appropriate
+
+---
+
+### MR already exists
+
+If an MR already exists for the branch:
+
+* update existing MR when possible
+* otherwise return existing MR link
+
+---
+
+## Optional Enhancements
+
+### Draft MR support
+
+```bash
+glab mr create --draft
+```
+
+---
+
+### Conventional commit validation
+
+```bash
+git log -1 --pretty=%s
+```
+
+Validate commit format before MR creation.
+
+---
+
+## Expected Outcome
+
+After successful execution:
+
+* local changes are committed
+* branch is pushed to GitLab
+* Merge Request is created or updated
+* source branch is configured for automatic cleanup after merge
