@@ -1,0 +1,13 @@
+{
+    "name": "joe-cc-marketplace",
+    "owner": {
+        "name": "Joe"
+    },
+    "plugins": [
+        {
+            "name": "gitlab-plugin",
+            "source": "./plugins/gitlab-plugin",
+            "description": "Gitlab skills for Joe"
+        }
+    ]
+}
