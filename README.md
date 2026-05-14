@@ -26,11 +26,15 @@ Install directly from the Claude Code marketplace:
 claude marketplace install lshgdut/cc-marketplace
 ```
 
+The cc marketplace provides some other related plugins for Claude Code.
+
+- Register the marketplace:
+
+  ```bash
+  /plugin marketplace add lshgdut/cc-marketplace
+  ```
+
 After installation, Claude Code automatically discovers and loads the skills.
-
-Official documentation:
-
-* [https://code.claude.com/docs/en/skills](https://code.claude.com/docs/en/skills)
 
 ---
 

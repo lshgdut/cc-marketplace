@@ -1,7 +1,8 @@
 {
-    "name": "cc-marketplace",
+    "name": "joe-marketplace",
     "owner": {
-        "name": "Joe"
+        "name": "Joe",
+        "email": "lshgdut@qq.com"
     },
     "plugins": [
         {
