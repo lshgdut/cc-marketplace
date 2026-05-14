@@ -34,6 +34,12 @@ The cc marketplace provides some other related plugins for Claude Code.
   /plugin marketplace add lshgdut/cc-marketplace
   ```
 
+- Install the plugin from this marketplace:
+
+  ```bash
+  /plugin install superjoe
+  ```
+
 After installation, Claude Code automatically discovers and loads the skills.
 
 ---
