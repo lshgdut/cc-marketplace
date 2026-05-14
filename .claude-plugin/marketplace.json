@@ -1,13 +1,15 @@
 {
-    "name": "joe-marketplace",
+    "name": "superjoe-dev",
+    "description": "Development marketplace for Joe's core skills library",
     "owner": {
         "name": "Joe",
         "email": "lshgdut@qq.com"
     },
     "plugins": [
         {
-            "name": "gitlab-plugin",
-            "source": "./plugins/gitlab-plugin",
+            "name": "superjoe",
+            "version": "1.0.0",
+            "source": "./",
             "description": "Gitlab skills for Joe"
         }
     ]
