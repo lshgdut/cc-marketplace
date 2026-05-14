@@ -1,0 +1,19 @@
+{
+    "name": "superjoe",
+    "description": "Core skills library for Claude Code: gitlab, and more in the future",
+    "version": "1.0.0",
+    "author": {
+        "name": "Joe",
+        "email": "lshgdut@qq.com"
+    },
+    "homepage": "https://github.com/lshgdut/cc-marketplace",
+    "repository": "https://github.com/lshgdut/cc-marketplace",
+    "license": "MIT",
+    "keywords": [
+        "skills",
+        "gitlab",
+        "glab",
+        "best-practices",
+        "workflows"
+    ]
+}
