@@ -8,9 +8,9 @@
     "plugins": [
         {
             "name": "superjoe",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "source": "./",
-            "description": "Gitlab skills for Joe"
+            "description": "Skills for Joe"
         }
     ]
 }
