@@ -155,7 +155,7 @@ Good commit messages:
 - If no files are staged, it will prompt to stage all modified and new files
 - The commit message will be constructed based on the changes detected
 - Before committing, the command will review the diff to identify if multiple commits would be more appropriate
-- Never modify the files in the committed files automatically, always prompting first
+- Never modify the files in the committed files automatically, prompting first to confirm if needed
 - If suggesting multiple commits, it will help you stage and commit the changes separately
 - Always reviews the commit diff to ensure the message matches the changes
 - Use Chinese language to generate message by default
