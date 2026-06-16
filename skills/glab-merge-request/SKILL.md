@@ -95,12 +95,7 @@ Then create a personal feature branch automatically.
 Example:
 
 ```bash
-AUTHOR=$(git config user.name | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
-RANDOM_SUFFIX=$(openssl rand -hex 3)
-
-BRANCH_NAME="mr-${AUTHOR}-${RANDOM_SUFFIX}"
-
-git checkout -b "$BRANCH_NAME"
+git checkout -b "mr-$(git config user.name | tr ' ' '-')-$(openssl rand -hex 3)"
 ```
 
 Otherwise continue using current branch.
