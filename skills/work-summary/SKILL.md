@@ -5,7 +5,7 @@ description: generative work summary report
 disable-model-invocation: false
 ---
 
-# Generate a comprehensive report for the given period of time.
+# Generate a comprehensive report for the given period of time
 
 根据给定的时间段，基于 git commit 日志生成一份综合工作任务报告。
 
