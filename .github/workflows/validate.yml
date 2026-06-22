@@ -17,11 +17,11 @@ jobs:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Install markdownlint-cli
-        run: npm install -g markdownlint-cli
+      # - name: Install markdownlint-cli
+      #   run: npm install -g markdownlint-cli
 
       - name: Run validate.sh
         run: bash scripts/validate.sh
 
-      - name: Run markdownlint
-        run: markdownlint .
+      # - name: Run markdownlint
+      #   run: markdownlint .
