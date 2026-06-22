@@ -1,16 +1,16 @@
 {
-    "name": "superjoe-dev",
-    "description": "Development marketplace for Joe's core skills library",
-    "owner": {
-        "name": "Joe",
-        "email": "lshgdut@qq.com"
-    },
-    "plugins": [
-        {
-            "name": "superjoe",
-            "version": "1.0.2",
-            "source": "./",
-            "description": "Skills for Joe"
-        }
-    ]
+  "name": "superjoe-dev",
+  "description": "Development marketplace for Joe's core skills library",
+  "owner": {
+    "name": "Joe",
+    "email": "lshgdut@qq.com"
+  },
+  "plugins": [
+    {
+      "name": "superjoe",
+      "version": "1.0.3",
+      "source": "./",
+      "description": "Skills for Joe"
+    }
+  ]
 }
