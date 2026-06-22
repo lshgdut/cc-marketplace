@@ -6,6 +6,10 @@ on:
       - '.claude-plugin/plugin.json'
       - '.claude-plugin/marketplace.json'
 
+concurrency:
+  group: sync-version-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -23,6 +27,7 @@ jobs:
       - name: Mirror plugin.json version into marketplace.json
         id: sync
         run: |
+          set -o pipefail
           if bash scripts/bump-version.sh --sync 2>&1 | tee /tmp/sync.log; then
             if [[ -n "$(git status --porcelain .claude-plugin/marketplace.json)" ]]; then
               echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -37,8 +42,14 @@ jobs:
       - name: Commit and push sync
         if: steps.sync.outputs.changed == 'true' && github.event.pull_request.head.repo.full_name == github.repository
         run: |
+          cp .claude-plugin/marketplace.json /tmp/marketplace.json.synced
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git checkout "${{ github.event.pull_request.head.ref }}"
+          cp /tmp/marketplace.json.synced .claude-plugin/marketplace.json
+
           git add .claude-plugin/marketplace.json
           git commit -m "chore: sync marketplace.json version from plugin.json"
           git push
