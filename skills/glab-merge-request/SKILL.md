@@ -11,6 +11,7 @@ allowed-tools:
   - Bash(git checkout *)
   - Bash(git remote *)
   - Bash(git config *)
+  - Bash(git log *)
   - Bash(glab *)
   - Bash(which glab)
   - Bash(openssl rand *)
@@ -180,28 +181,52 @@ If commit fails:
 
 ## Step 4: Push and Create Merge Request
 
-Prefer auto-detecting default branch:
+### 4.1: Determine Target Branch
 
 ```bash
 git remote show origin | grep 'HEAD branch'
 ```
 
-Create MR:
+If detected, use it as `--target-branch`. Otherwise fall back to `main`.
+
+### 4.2: Generate MR Title and Description
+
+Generate the title and description from **all commits in the MR**, not just the latest. If a GitLab MR template exists, use it as the structure for the description.
+
+**Collect commits between source and target:**
+
+```bash
+git log <target-branch>..<source-branch> --pretty=format:"%s%n%n%b%n---%n"
+```
+
+**Check for a GitLab MR template** (in priority order):
+
+1. `.gitlab/merge_request.md` — single file
+2. `.gitlab/merge_request_templates/<name>.md` — named template
+
+Use `Glob` to locate templates, `Read` to load content.
+
+**Build content:**
+
+* **Title**: aggregate commit subjects into a single conventional title (e.g. `feat+fix: add login and resolve timeout`)
+* **Description**:
+  * If a template exists, preserve its sections and fill its placeholders from the commit content
+  * Otherwise, summarize the commits: what changed, why, and how to verify
+
+### 4.3: Create MR
+
+Pass the generated content explicitly. Do **not** use `--fill`:
 
 ```bash
 glab mr create \
-  --fill \
+  --title "$MR_TITLE" \
+  --description "$MR_DESCRIPTION" \
+  --target-branch <default-branch> \
   --push \
   --yes \
   --remove-source-branch \
   --create-source-branch \
   --no-editor
-```
-
-If default branch was detected, use it as:
-
-```bash
---target-branch <default-branch>
 ```
 
 ---
